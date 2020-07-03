@@ -4,6 +4,13 @@
 
 import itertools
 
+
+def sumoftuple(tuple):
+  sum = 0
+  for i in tuple:
+    sum = sum + i
+  return sum
+
 #各个釜生产不同种类产品时的不同CRF，crf意思为capacity reuirement factor,通常用hr/ton来表示，比如说CRF=1即一吨产品需要一个小时来完成生产。
 #对于只有一种产品生产能力的生产线，那么它的列表里只有一个数；对于有多种产品生产能力的生产线，那么对每种产品有不同的CRF。
 crfR1 = [4,5.7,3.8]
@@ -44,12 +51,3 @@ for c in zuhe:
       capacity.append(sum)
 print('单日产能介于%.2f和%.2f之间。'%(min(capacity),max(capacity)))
 
-
-
-def sumoftuple(tuple):
-  sum = 0
-  for i in tuple:
-    sum = sum + i
-  return sum
-
- 
