@@ -12,18 +12,11 @@
 # 浅拷贝和深拷贝的不同。简单来说赋值是同一个列表，浅拷贝是不同列表但只拷贝了一层，嵌套的仍然一样。深拷贝是
 # 即使是多层嵌套也是完全不同的列表。我在这个地方卡了很久，最后debug看变量变化觉得不对劲查资料才查出来。）最后，
 # 我们将新列表的单个元素加入组合。
-# 这里还有一个问题没有得到解决，如何将多层嵌套的数组，展开成二维数组？在进行对newcombi加入新的元素时，产生的是
-# 一个数组加一个元素的组合，这样得到的不是一个二维数组，而是一个四不像。
+
 
 import copy
 
-def flatten(items):
-    for item in items:
-      if isinstance(item[0], list):
-              yield from flatten(item)
-      else:
-          yield item
-        
+ 
 
 def combinenumber(inputarray):
   n = len(inputarray)
@@ -59,21 +52,25 @@ capR9 = list(map(crftocap,crfR9))
 
 #total为全列表，用来供combinations做不同的组合
 total = [capR1,capR2,capR3,capR4,capR5,capR6,capR9]
+# print(total)
 # reactor = len(total)
 # b = combinenumber(total)
 # print(b)
 
-
+'''
+下面这一段是错误的代码，主要原因为在进行加入新元素组合时，组合在新列表有一个以上元素时，第一轮新元素循环
+过后，新元素组合发生了变化，导致第二轮相同列表里的第二第三第四个元素再组合时和自己的同组元素发生了组合，
+不符合组合的原意。新的代码引入了新变量来存储组合，保持在一个新列表进来循环时，原组合不发生变化。
 def capacitycombination(capacityarray):
-# 拿到数组的个数，即生产线数，每个数组里元素的个数，即产品种类数 
+  # 拿到数组的个数，即生产线数，每个数组里元素的个数，即产品种类数 
   n = len(capacityarray)
   m=[]
   for i in range(0,n):
     m.append(len(capacityarray[i]))
-# 建立新的列表用来存储组合
+  # 建立新的列表用来存储组合
   combination = []
   
-# 初始化第一个组合为第一组数，逐个读取出来
+  # 初始化第一个组合为第一组数，逐个读取出来
   for items in capacityarray[0]:
     item = [items]
     combination.append(item)
@@ -83,25 +80,55 @@ def capacitycombination(capacityarray):
   for i in range(1,n):
     newcombi = copy.deepcopy(combination)
     # print(newcombi)
-    for items in capacityarray[i]:
-      
-# 加入第i个数组和前面已产生的组合组合起来的新组合
+    for items in capacityarray[i]:      
+      # 加入第i个数组和前面已产生的组合组合起来的新组合
       for newitems in newcombi:
         # print(newitems)
         newitems.append(items)
-      # print(newcombi)
-    combination.append(newcombi)
-# 加入第i个数组自身的单个组合
-    soloitem = [items]
-    combination.append(soloitem)
-     
+        # print(newcombi)
+        combination.append(newitems)
+      # 加入第i个数组自身的单个组合
+      soloitem = [items]
+      combination.append(soloitem)
+           
+  return combination
+'''  
+def capacitycombination(capacityarray):
+  # 拿到数组的个数，即生产线数，每个数组里元素的个数，即产品种类数 
+  n = len(capacityarray)
+  m=[]
+  for i in range(0,n):
+    m.append(len(capacityarray[i]))
+  # 建立新的列表用来存储组合
+  combination = []
+  
+  # 初始化第一个组合为第一组数，逐个读取出来
+  for items in capacityarray[0]:
+    item = [items]
+    combination.append(item)
+  # print(combination)
+    
+# 开始构建逐步加入数组之后的组合情况 
+  for i in range(1,n):
+    newcombi = copy.deepcopy(combination)
+    # print(newcombi)
+    for items in capacityarray[i]:      
+      # 加入第i个数组和前面已产生的组合组合起来的新组合
+      
+      for newitems in newcombi:
+        # print(newitems)
+        newzuhe = copy.deepcopy(newitems)
+        newzuhe.append(items)
+        # print(newcombi)
+        combination.append(newzuhe)
+      # 加入第i个数组自身的单个组合
+      soloitem = [items]
+      combination.append(soloitem)
+           
   return combination
 
 c = capacitycombination(total)
-output = list(flatten(c))
+# print(c)
 fo = open("output.txt","w")
-fo.write(str(output))
-fo.close()
-fo = open("output1.txt","w")
 fo.write(str(c))
 fo.close()
