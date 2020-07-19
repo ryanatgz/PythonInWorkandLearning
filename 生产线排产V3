@@ -1,0 +1,107 @@
+# 解决排产问题组合的思路：
+# 问题求解的思路可使用递推法来实现：
+# 设选择n个列表时的组合是f(n),每个列表中的元素数字个数为m[0],m[1]，...m[n],那么
+# f(1)为一个长度为m[0]的列表,只有一个列表，那么列表只有一种选法，就是它自己，它的组合就是它自己
+# 元素每个单个组合。
+# 当第二个列表加入进来时，因为加一组列表后，组合多了两个部分，
+# 第一个部分是这组列表本身自己的组合，我们用soloitem来表示，另一个部分是这个列表加入到之前的列表组合中产生
+# 的组合。即：
+# 首先我们要复制现阶段的组合，然后使用所有的这些组合，和新的列表中的元素进行组合，产生新的组合后，加入到已有
+# 的组合中；这个我们使用一个新的列表来实现，即newcombi。（这里要提到，不同于其他比如说c语言，直接将a列表赋值给
+# b列表之后并不会得到一个真正的列表，而只是引用，修改b也会修改a。所以要使用deepcopy方法。这个需要参见有关赋值，
+# 浅拷贝和深拷贝的不同。简单来说赋值是同一个列表，浅拷贝是不同列表但只拷贝了一层，嵌套的仍然一样。深拷贝是
+# 即使是多层嵌套也是完全不同的列表。我在这个地方卡了很久，最后debug看变量变化觉得不对劲查资料才查出来。）最后，
+# 我们将新列表的单个元素加入组合。
+# 这里还有一个问题没有得到解决，如何将多层嵌套的数组，展开成二维数组？在进行对newcombi加入新的元素时，产生的是
+# 一个数组加一个元素的组合，这样得到的不是一个二维数组，而是一个四不像。
+
+import copy
+
+def flatten(items):
+    for item in items:
+      if isinstance(item[0], list):
+              yield from flatten(item)
+      else:
+          yield item
+        
+
+def combinenumber(inputarray):
+  n = len(inputarray)
+  m=[]
+  for i in range(0,n):
+    m.append(len(inputarray[i]))
+  f = len(inputarray[0])
+  for i in range(1,n):
+    f = f+(f+1)*m[i]
+  return f
+
+#各条生产线生产不同种类产品时的不同CRF，来源：capacity review表
+crfR1 = [4,5.7,3.8]
+crfR2 = [2]
+crfR3 = [1.1,1.6]
+crfR4 = [1.56]
+crfR5 = [0.9]
+crfR6 = [1.9]
+crfR9 = [0.55]
+
+#将CRF转化为单生产线单日产能
+def crftocap(a):
+  return 24/a
+
+#将每个釜的单生产线单日产能存为列表
+capR1 = list(map(crftocap,crfR1))
+capR2 = list(map(crftocap,crfR2))
+capR3 = list(map(crftocap,crfR3))
+capR4 = list(map(crftocap,crfR4))
+capR5 = list(map(crftocap,crfR5))
+capR6 = list(map(crftocap,crfR6))
+capR9 = list(map(crftocap,crfR9))
+
+#total为全列表，用来供combinations做不同的组合
+total = [capR1,capR2,capR3,capR4,capR5,capR6,capR9]
+# reactor = len(total)
+# b = combinenumber(total)
+# print(b)
+
+
+def capacitycombination(capacityarray):
+# 拿到数组的个数，即生产线数，每个数组里元素的个数，即产品种类数 
+  n = len(capacityarray)
+  m=[]
+  for i in range(0,n):
+    m.append(len(capacityarray[i]))
+# 建立新的列表用来存储组合
+  combination = []
+  
+# 初始化第一个组合为第一组数，逐个读取出来
+  for items in capacityarray[0]:
+    item = [items]
+    combination.append(item)
+  # print(combination)
+    
+# 开始构建逐步加入数组之后的组合情况 
+  for i in range(1,n):
+    newcombi = copy.deepcopy(combination)
+    # print(newcombi)
+    for items in capacityarray[i]:
+      
+# 加入第i个数组和前面已产生的组合组合起来的新组合
+      for newitems in newcombi:
+        # print(newitems)
+        newitems.append(items)
+      # print(newcombi)
+    combination.append(newcombi)
+# 加入第i个数组自身的单个组合
+    soloitem = [items]
+    combination.append(soloitem)
+     
+  return combination
+
+c = capacitycombination(total)
+output = list(flatten(c))
+fo = open("output.txt","w")
+fo.write(str(output))
+fo.close()
+fo = open("output1.txt","w")
+fo.write(str(c))
+fo.close()
